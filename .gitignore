@@ -1,0 +1,23 @@
+# Python-specific files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyz
+*.pywz
+*.pyw
+*.pyi
+*.ipynb_checkpoints/
+*~$*
+
+# Logs
+*.log
+
+# Matrix credentials
+matrix_creds.json
+
+# Service account token
+*.json
+
+# Virtual environment
+venv/
