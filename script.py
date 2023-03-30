@@ -17,7 +17,7 @@ logging.basicConfig(
 
 # Define constants
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-SERVICE_ACCOUNT_FILE = '/path/to/service-account.json'
+SERVICE_ACCOUNT_FILE = 'service-account.json'
 MATRIX_USER_ID = '@your_matrix_user_id:your_matrix_server'
 MATRIX_ACCESS_TOKEN = 'your_matrix_access_token'
 MATRIX_ROOM_ID = '!your_room_id:your_matrix_server'
