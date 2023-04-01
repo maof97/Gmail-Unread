@@ -44,7 +44,7 @@ def main():
             return
         print("Labels:")
         for label in labels:
-            print(label["name"])
+            print(label["name"] + " " + label["id"])
 
     except HttpError as error:
         # TODO(developer) - Handle errors from gmail API.

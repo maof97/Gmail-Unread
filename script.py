@@ -18,7 +18,7 @@ logging.basicConfig(
 )
 
 # Define constants
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.modify"]
+SCOPES = ["https://www.googleapis.com/auth/gmail.metadata", "https://www.googleapis.com/auth/gmail.labels"]
 TOKEN_FILE = "token.json"
 SERVICE_ACCOUNT_FILE = "token_cred.json"
 MATRIX_FILE = "matrix-credentials.json"
@@ -70,10 +70,11 @@ def main():
             logging.error("Initialization failed. Exiting.")
             exit()
 
-        # Search for unread messages with specific label
+        # Search for unread messages with specific label, but without 'q' using format=METADATA and labelIds
         query = "is:unread label:PW Reset Mails"
         try:
-            response = gmail_service.users().messages().list(userId="me", q=query).execute()
+            # response = gmail_service.users().messages().list(userId="me", labelIds=["UNREAD", "PW Reset Mails"]).execute()
+            response = gmail_service.users().messages().list(userId="me", labelIds=["Label_2839713299079306617"]).execute()
             messages = response.get("messages", [])
         except Exception as e:
             logging.error(f"Unable to search for messages: {str(e)}")
@@ -81,11 +82,24 @@ def main():
 
         # If there are unread messages, send an alert to Matrix
         if messages:
+            # Check if there are any messages that have already been handled
+            handled_messages = []
+            if os.path.exists("handled_messages.txt"):
+                with open("handled_messages.txt", "r") as f:
+                    handled_messages = f.read().splitlines()
+
+            # Remove handled messages from list
+            messages = [msg for msg in messages if msg["id"] not in handled_messages]
+            if not messages:
+                logging.info("No new messages found.")
+                exit()
+
+            # Get message details for each message
             logging.info(f"{len(messages)} unread messages found.")
             alert_message = ""
             for msg in messages:
                 try:
-                    message = gmail_service.users().messages().get(userId="me", id=msg["id"]).execute()
+                    message = gmail_service.users().messages().get(userId="me", id=msg["id"], format="metadata").execute()
 
                     # Get sender and subject of message
                     for header in message["payload"]["headers"]:
@@ -95,6 +109,7 @@ def main():
                             subject = header["value"]
 
                     alert_message += f"Sender: {sender}\nSubject: {subject}\n\n"
+                    logging.info(f"New message from '{sender}' with subject '{subject}' message id: '{msg['id']}'")
                 except Exception as e:
                     logging.error(f"Unable to retrieve message: {str(e)}")
 
@@ -109,16 +124,14 @@ def main():
             except Exception as e:
                 logging.error(f"Unable to send alert to Matrix: {str(e)}")
 
-            # Mark messages as read
-            try:
+            # Write handled messages to file
+            with open("handled_messages.txt", "a") as f:
                 for msg in messages:
-                    gmail_service.users().messages().modify(userId="me", id=msg["id"], body={"removeLabelIds": ["UNREAD"]}).execute()
-                logging.info("Messages marked as read.")
-            except Exception as e:
-                logging.error(f"Unable to mark messages as read: {str(e)}")
+                    f.write(f"{msg['id']}\n")
+                    logging.info(f"Message '{msg['id']}' written to file.")
 
         else:
-            logging.info("No unread messages found.")
+            logging.info("No messages found.")
 
     except HttpError as error:
         # TODO(developer) - Handle errors from gmail API.
@@ -126,6 +139,4 @@ def main():
 
 
 if __name__ == "__main__":
-    creds = Credentials.from_authorized_user_file(SERVICE_ACCOUNT_FILE, SCOPES)
-    login_browser(creds)
     main()
