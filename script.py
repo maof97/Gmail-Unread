@@ -21,6 +21,7 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.metadata", "https://www.googlea
 TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "token.json")
 SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "token_cred.json")
 MATRIX_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "matrix-credentials.json")
+HANDLED_FILES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "handled_messages.txt")
 
 # Get Matrix credentialss from json file:
 try:
@@ -83,8 +84,8 @@ def main():
         if messages:
             # Check if there are any messages that have already been handled
             handled_messages = []
-            if os.path.exists("handled_messages.txt"):
-                with open("handled_messages.txt", "r") as f:
+            if os.path.exists(HANDLED_FILES):
+                with open(HANDLED_FILES, "r") as f:
                     handled_messages = f.read().splitlines()
 
             # Remove handled messages from list
@@ -124,7 +125,7 @@ def main():
                 logging.error(f"Unable to send alert to Matrix: {str(e)}")
 
             # Write handled messages to file
-            with open("handled_messages.txt", "a") as f:
+            with open(HANDLED_FILES, "a") as f:
                 for msg in messages:
                     f.write(f"{msg['id']}\n")
                     logging.info(f"Message '{msg['id']}' written to file.")
