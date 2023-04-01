@@ -18,9 +18,9 @@ logging.basicConfig(
 
 # Define constants
 SCOPES = ["https://www.googleapis.com/auth/gmail.metadata", "https://www.googleapis.com/auth/gmail.labels"]
-TOKEN_FILE = "token.json"
-SERVICE_ACCOUNT_FILE = "token_cred.json"
-MATRIX_FILE = "matrix-credentials.json"
+TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "token.json")
+SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "token_cred.json")
+MATRIX_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "matrix-credentials.json")
 
 # Get Matrix credentialss from json file:
 try:
