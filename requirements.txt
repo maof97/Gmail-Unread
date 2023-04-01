@@ -2,3 +2,5 @@ google-auth
 google-auth-oauthlib
 google-api-python-client
 matrix-client
+google-auth-httplib2
+requests

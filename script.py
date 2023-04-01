@@ -10,7 +10,6 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 import matrix_client.api as matrix_client_api
-import matrix_client.errors
 
 # Set up logging
 logging.basicConfig(
