@@ -43,6 +43,24 @@ def login_browser(creds):
             logging.critical(f"Unable to refresh credentials: {str(e)} MANUAL INTERVENTION REQUIRED!")
             logging.info("Removing invalid credetials.")
             os.remove(SERVICE_ACCOUNT_FILE)
+
+            # Inform user to re-run script via Matrix
+            # First check if message was not already sent by looking for "MANUAL INTERVENTION REQUIRED"  in log file
+            with open("script.log", "r") as f:
+                if "MANUAL INTERVENTION REQUIRED" in f.read():
+                    logging.info("Alert already sent to Matrix. Exiting.")
+                    exit()
+
+            logging.info("Sending alert to Matrix.")
+            matrix_client = matrix_client_api.MatrixHttpApi(MATRIX_SERVER, token=MATRIX_ACCESS_TOKEN)
+            matrix_client.send_message_event(
+                room_id=MATRIX_ROOM_ID,
+                event_type="m.room.message",
+                content={"msgtype": "m.text", "body": "⚠️ Gmail credentials expired. Please re-run script manually."},
+            )
+            logging.info("Alert sent to Matrix.")
+
+            logging.info("Exiting.")
             exit()
     else:
         flow = InstalledAppFlow.from_client_secrets_file(TOKEN_FILE, SCOPES)
