@@ -45,9 +45,9 @@ def login_browser(creds):
             os.remove(SERVICE_ACCOUNT_FILE)
 
             # Inform user to re-run script via Matrix
-            # First check if message was not already sent by looking for "MANUAL INTERVENTION REQUIRED"  in log file
+            # First check if message was not already sent by looking for "Sending alert to Matrix"  in log file
             with open("script.log", "r") as f:
-                if "MANUAL INTERVENTION REQUIRED" in f.read():
+                if "Sending alert to Matrix" in f.read():
                     logging.info("Alert already sent to Matrix. Exiting.")
                     exit()
 
