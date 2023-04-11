@@ -8,6 +8,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.auth.exceptions import RefreshError
 
 import matrix_client.api as matrix_client_api
 
@@ -30,13 +31,19 @@ try:
     # MATRIX_USER_ID = json.load(open(MATRIX_FILE))["MATRIX_USER_ID"]
     MATRIX_SERVER = json.load(open(MATRIX_FILE))["MATRIX_SERVER"]
 except Exception as e:
-    logging.error(f"Unable to retrieve Matrix credentials: {str(e)}")
+    logging.warning(f"Unable to retrieve Matrix credentials: {str(e)}")
     exit()
 
 
 def login_browser(creds):
     if creds and creds.expired and creds.refresh_token:
-        creds.refresh(Request())
+        try:
+            creds.refresh(Request())
+        except RefreshError as e:
+            logging.critical(f"Unable to refresh credentials: {str(e)} MANUAL INTERVENTION REQUIRED!")
+            logging.info("Removing invalid credetials.")
+            os.remove(SERVICE_ACCOUNT_FILE)
+            exit()
     else:
         flow = InstalledAppFlow.from_client_secrets_file(TOKEN_FILE, SCOPES)
         creds = flow.run_local_server(port=0)
