@@ -41,8 +41,6 @@ def login_browser(creds):
             creds.refresh(Request())
         except RefreshError as e:
             logging.critical(f"Unable to refresh credentials: {str(e)} MANUAL INTERVENTION REQUIRED!")
-            logging.info("Removing invalid credetials.")
-            os.remove(SERVICE_ACCOUNT_FILE)
 
             # Inform user to re-run script via Matrix
             # First check if message was not already sent by looking for "Sending alert to Matrix"  in log file
@@ -56,7 +54,7 @@ def login_browser(creds):
             matrix_client.send_message_event(
                 room_id=MATRIX_ROOM_ID,
                 event_type="m.room.message",
-                content={"msgtype": "m.text", "body": "⚠️ Gmail credentials expired. Please re-run script manually."},
+                content={"msgtype": "m.text", "body": "⚠️ Gmail credentials expired. Please delete expired token and re-run script manually."},
             )
             logging.info("Alert sent to Matrix.")
 
